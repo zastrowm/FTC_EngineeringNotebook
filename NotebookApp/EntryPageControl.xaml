@@ -1,0 +1,572 @@
+﻿<UserControl x:Class="EngineeringNotebook.EntryPageControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="clr-namespace:EngineeringNotebook.Converters"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:ei="http://schemas.microsoft.com/expression/2010/interactions"
+             xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+             xmlns:local="clr-namespace:EngineeringNotebook"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:mvvm="clr-namespace:EngineeringNotebook.Mvvm"
+             xmlns:v="clr-namespace:NotebookApp.Views"
+             xmlns:views="clr-namespace:EngineeringNotebook.Views"
+             xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+             HorizontalAlignment="Stretch"
+             VerticalAlignment="Stretch"
+             d:DataContext="{d:DesignInstance {x:Type mvvm:PageEntryViewModel},
+                                              d:IsDesignTimeCreatable=True}"
+             d:DesignHeight="1000"
+             d:DesignWidth="800"
+             mc:Ignorable="d">
+  <UserControl.Resources>
+
+
+    <!--  Textbox that continues down  -->
+    <Style x:Key="ExpandingTextBox" BasedOn="{StaticResource {x:Type TextBox}}" TargetType="TextBox">
+      <Setter Property="TextWrapping" Value="Wrap" />
+      <Setter Property="MinHeight" Value="40" />
+      <Setter Property="Margin" Value="0,0,0,6" />
+      <Setter Property="AcceptsReturn" Value="True" />
+    </Style>
+
+    <!--  Small Button  -->
+    <Style x:Key="SmallButton" TargetType="Button">
+      <Setter Property="VerticalAlignment" Value="Top" />
+      <Setter Property="HorizontalAlignment" Value="Center" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
+      <Setter Property="MinWidth" Value="24" />
+      <Setter Property="MinHeight" Value="24" />
+      <Setter Property="Margin" Value="3,0,3,6" />
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="FontSize" Value="12" />
+    </Style>
+
+    <!--  Image Button Overlay  -->
+    <Style x:Key="ImageButton" TargetType="Button">
+      <Setter Property="Width" Value="24" />
+      <Setter Property="Height" Value="24" />
+      <Setter Property="MinWidth" Value="0" />
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="Opacity" Value=".3" />
+      <Setter Property="CommandParameter" Value="{Binding}" />
+    </Style>
+
+    <!--  Close Button  -->
+    <Style x:Key="CloseButton" BasedOn="{StaticResource SmallButton}" TargetType="Button">
+
+      <Setter Property="Command" Value="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=DataContext.RemoveItemCommand}" />
+      <Setter Property="CommandParameter" Value="{Binding}" />
+      <Setter Property="Content" Value="X" />
+    </Style>
+
+    <!--  Close Button  -->
+    <Style x:Key="MoveUpButton" BasedOn="{StaticResource SmallButton}" TargetType="Button">
+      <Setter Property="Command" Value="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=DataContext.MoveItemUpCommand}" />
+      <Setter Property="CommandParameter" Value="{Binding}" />
+      <Setter Property="Content" Value="▲" />
+    </Style>
+
+    <!--  Close Button  -->
+    <Style x:Key="MoveDownButton" BasedOn="{StaticResource SmallButton}" TargetType="Button">
+      <Setter Property="Command" Value="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=DataContext.MoveItemDownCommand}" />
+      <Setter Property="CommandParameter" Value="{Binding}" />
+      <Setter Property="Content" Value="▼" />
+    </Style>
+
+
+    <!--  List Item Control  -->
+    <DataTemplate x:Key="ListEditorTemplate"
+                  DataType="{x:Type mvvm:ListCollectionViewModel}">
+      <StackPanel>
+        <ItemsControl x:Name="TheParent"
+                      ItemsSource="{Binding Items}">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate DataType="{x:Type mvvm:ListItemViewModel}">
+              <DockPanel Background="Transparent"
+                         Tag="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl},
+                                       Path=DataContext}">
+                <DockPanel.ContextMenu>
+                  <ContextMenu>
+                    <MenuItem Command="{Binding Owner.MoveItemUpCommand}"
+                              CommandParameter="{Binding}"
+                              Header="Move Up" />
+                    <MenuItem Command="{Binding Owner.MoveItemDownCommand}"
+                              CommandParameter="{Binding}"
+                              Header="Move Down" />
+                  </ContextMenu>
+                </DockPanel.ContextMenu>
+                <Button Style="{StaticResource CloseButton}"
+                        DockPanel.Dock="Right" />
+                <TextBox Style="{StaticResource ExpandingTextBox}"
+                         Text="{Binding Content}" />
+              </DockPanel>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+        <StackPanel HorizontalAlignment="Right"
+                    Orientation="Horizontal">
+          <Button Style="{StaticResource SmallButton}"
+                  Command="{Binding AddItemCommand}">
+            +
+          </Button>
+        </StackPanel>
+      </StackPanel>
+    </DataTemplate>
+
+    <!--  DatePickerStyle  -->
+    <Style x:Key="DatePickerStyle" TargetType="{x:Type xctk:DateTimePicker}">
+      <Setter Property="VerticalAlignment" Value="Center" />
+      <Setter Property="MinWidth" Value="130" />
+    </Style>
+
+    <Style x:Key="Indented" TargetType="FrameworkElement">
+      <Setter Property="Margin" Value="10,0,0,0" />
+    </Style>
+
+
+    <Style x:Key="SubSectionContent" TargetType="{x:Type ContentControl}">
+      <Style.Triggers>
+        <!--  Title  -->
+        <DataTrigger Binding="{Binding Path=SectionType}"
+                     Value="{x:Static mvvm:SubSectionType.Title}">
+          <Setter Property="ContentTemplate">
+            <Setter.Value>
+              <DataTemplate DataType="mvvm:SubSectionEntryViewModel">
+                <xctk:WatermarkTextBox Grid.Column="1"
+                                       FontSize="20"
+                                       FontWeight="Bold"
+                                       DataContext="{Binding RelativeSource={RelativeSource AncestorType=ContentControl},
+                                                             Path=DataContext}"
+                                       Text="{Binding Path=Title}"
+                                       Watermark="Section Title" />
+              </DataTemplate>
+            </Setter.Value>
+          </Setter>
+        </DataTrigger>
+        <!--  Text  -->
+        <DataTrigger Binding="{Binding Path=SectionType}"
+                     Value="{x:Static mvvm:SubSectionType.Text}">
+          <Setter Property="ContentTemplate">
+            <Setter.Value>
+              <DataTemplate DataType="mvvm:SubSectionEntryViewModel">
+                <xctk:WatermarkTextBox Grid.Column="1"
+                                       Style="{StaticResource ExpandingTextBox}"
+                                       DataContext="{Binding RelativeSource={RelativeSource AncestorType=ContentControl},
+                                                             Path=DataContext}"
+                                       Text="{Binding Path=TextContent}"
+                                       Watermark="Paragraph Text" />
+              </DataTemplate>
+            </Setter.Value>
+          </Setter>
+        </DataTrigger>
+        <!--  ImageAndCaption  -->
+        <DataTrigger Binding="{Binding Path=SectionType}"
+                     Value="{x:Static mvvm:SubSectionType.ImageAndCaption}">
+          <Setter Property="ContentTemplate">
+            <Setter.Value>
+              <DataTemplate DataType="mvvm:SubSectionEntryViewModel">
+                <StackPanel DataContext="{Binding RelativeSource={RelativeSource AncestorType=ContentControl}, Path=DataContext}">
+                  <Grid>
+                    <v:ImageContainer Image="{Binding Image.Image}" />
+                    <StackPanel HorizontalAlignment="Left"
+                                VerticalAlignment="Bottom"
+                                Orientation="Horizontal">
+                      <Button Style="{StaticResource ImageButton}"
+                              Command="{x:Static mvvm:ImageReference.RotateImageRightCommand}"
+                              CommandParameter="{Binding Image}"
+                              Content="↻" />
+                      <Button Style="{StaticResource ImageButton}"
+                              Command="{x:Static mvvm:ImageReference.RotateImageLeftCommand}"
+                              CommandParameter="{Binding Image}"
+                              Content="↺" />
+                    </StackPanel>
+                  </Grid>
+                  <xctk:WatermarkTextBox Style="{StaticResource ExpandingTextBox}"
+                                         Text="{Binding Path=TextContent}"
+                                         Watermark="Image Caption" />
+                </StackPanel>
+              </DataTemplate>
+            </Setter.Value>
+          </Setter>
+        </DataTrigger>
+        <!--  ImageCollection  -->
+        <DataTrigger Binding="{Binding Path=SectionType}"
+                     Value="{x:Static mvvm:SubSectionType.ImageCollection}">
+          <Setter Property="ContentTemplate">
+            <Setter.Value>
+              <DataTemplate DataType="mvvm:SubSectionEntryViewModel">
+                <StackPanel DataContext="{Binding RelativeSource={RelativeSource AncestorType=ContentControl}, Path=DataContext}">
+                  <ItemsControl ItemsSource="{Binding AllImages}">
+                    <ItemsControl.Resources>
+                      <DataTemplate DataType="{x:Type mvvm:ImageReference}">
+                        <Border BorderBrush="Gray"
+                                BorderThickness="1">
+                          <Grid>
+                            <v:ImageContainer Width="150"
+                                              Height="150"
+                                              Image="{Binding Image}" />
+                            <StackPanel HorizontalAlignment="Left"
+                                        VerticalAlignment="Bottom">
+                              <StackPanel Orientation="Horizontal">
+                                <Button Style="{StaticResource ImageButton}"
+                                        Command="{x:Static mvvm:ImageReference.RotateImageRightCommand}"
+                                        Content="↻" />
+                                <Button Style="{StaticResource ImageButton}"
+                                        Command="{x:Static mvvm:ImageReference.RotateImageLeftCommand}"
+                                        Content="↺" />
+                              </StackPanel>
+                              <StackPanel Orientation="Horizontal">
+
+                                <Button Style="{StaticResource ImageButton}"
+                                        Command="{Binding RelativeSource={RelativeSource AncestorType=ContentControl},
+                                                          Path=DataContext.RemoveImageCommand}"
+                                        Content="X" />
+                                <Button Style="{StaticResource ImageButton}"
+                                        Command="{Binding RelativeSource={RelativeSource AncestorType=ContentControl},
+                                                          Path=DataContext.MoveImageUpCommand}"
+                                        Content="&lt;" />
+                                <Button Style="{StaticResource ImageButton}"
+                                        Command="{Binding RelativeSource={RelativeSource AncestorType=ContentControl},
+                                                          Path=DataContext.MoveImageDownCommand}"
+                                        Content="&gt;" />
+                              </StackPanel>
+
+                            </StackPanel>
+                          </Grid>
+                        </Border>
+                      </DataTemplate>
+
+                    </ItemsControl.Resources>
+                    <ItemsControl.ItemsPanel>
+                      <ItemsPanelTemplate>
+                        <WrapPanel />
+                      </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                  </ItemsControl>
+
+                  <Button HorizontalAlignment="Right"
+                          Command="{Binding AddImageCommand}"
+                          Content="Add Image" />
+                </StackPanel>
+              </DataTemplate>
+            </Setter.Value>
+          </Setter>
+        </DataTrigger>
+        <!--  ImageWithCaptionAndBlurb  -->
+        <DataTrigger Binding="{Binding Path=SectionType}"
+                     Value="{x:Static mvvm:SubSectionType.ImageWithCaptionAndBlurb}">
+          <Setter Property="ContentTemplate">
+            <Setter.Value>
+              <DataTemplate DataType="mvvm:SubSectionEntryViewModel">
+                <Grid DataContext="{Binding RelativeSource={RelativeSource AncestorType=ContentControl}, Path=DataContext}">
+                  <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition />
+                  </Grid.RowDefinitions>
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition />
+                    <ColumnDefinition Width="Auto" />
+                  </Grid.ColumnDefinitions>
+
+                  <Border Grid.RowSpan="2"
+                          BorderBrush="Gray"
+                          BorderThickness="1">
+                    <Grid Grid.RowSpan="2">
+                      <v:ImageContainer MinWidth="200"
+                                        MinHeight="200"
+                                        MaxWidth="300"
+                                        MaxHeight="300"
+                                        Image="{Binding Image.Image}" />
+                      <StackPanel HorizontalAlignment="Left"
+                                  VerticalAlignment="Bottom"
+                                  Orientation="Horizontal">
+                        <Button Style="{StaticResource ImageButton}"
+                                Command="{x:Static mvvm:ImageReference.RotateImageRightCommand}"
+                                CommandParameter="{Binding Image}"
+                                Content="↻" />
+                        <Button Style="{StaticResource ImageButton}"
+                                Command="{x:Static mvvm:ImageReference.RotateImageLeftCommand}"
+                                CommandParameter="{Binding Image}"
+                                Content="↺" />
+                      </StackPanel>
+                    </Grid>
+                  </Border>
+                  <xctk:WatermarkTextBox Grid.Row="0"
+                                         Grid.Column="1"
+                                         Text="{Binding Title}"
+                                         Watermark="Image Caption" />
+                  <Button Grid.Row="0"
+                          Grid.Column="2"
+                          Style="{StaticResource CloseButton}"
+                          Command="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl},
+                                            Path=DataContext.RemoveItemCommand}"
+                          CommandParameter="{Binding}"
+                          DockPanel.Dock="Right" />
+                  <xctk:WatermarkTextBox Grid.Row="1"
+                                         Grid.Column="1"
+                                         Grid.ColumnSpan="2"
+                                         VerticalAlignment="Stretch"
+                                         Style="{StaticResource ExpandingTextBox}"
+                                         Text="{Binding TextContent}"
+                                         Watermark="Image Blurb" />
+                </Grid>
+              </DataTemplate>
+            </Setter.Value>
+          </Setter>
+        </DataTrigger>
+        <!--  ListItems  -->
+        <DataTrigger Binding="{Binding Path=SectionType}"
+                     Value="{x:Static mvvm:SubSectionType.ListItems}">
+          <Setter Property="ContentTemplate">
+            <Setter.Value>
+              <DataTemplate DataType="mvvm:SubSectionEntryViewModel">
+                <StackPanel DataContext="{Binding RelativeSource={RelativeSource AncestorType=ContentControl}, Path=DataContext}">
+                  <ContentPresenter Content="{Binding ListItems}"
+                                    ContentTemplate="{StaticResource ListEditorTemplate}" />
+                </StackPanel>
+              </DataTemplate>
+            </Setter.Value>
+          </Setter>
+        </DataTrigger>
+      </Style.Triggers>
+    </Style>
+
+  </UserControl.Resources>
+
+  <!--  CONTENT START  -->
+  <Grid>
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="*" />
+    </Grid.RowDefinitions>
+    <Grid>
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="Auto" />
+        <ColumnDefinition />
+      </Grid.ColumnDefinitions>
+
+      <!--  Title  -->
+      <Label>Title:</Label>
+      <TextBox x:Name="DocumentTitle"
+               Grid.Column="1"
+               Text="{Binding Title}" />
+    </Grid>
+
+    <ScrollViewer Grid.Row="1"
+                  Grid.ColumnSpan="2"
+                  Grid.IsSharedSizeScope="True"
+                  PanningMode="VerticalFirst">
+      <StackPanel Margin="0,0,20,0">
+        <!--  Date, Category, Process  -->
+        <WrapPanel Margin="0,3"
+                   Orientation="Horizontal">
+
+          <Label Content="Date: " />
+          <xctk:DateTimePicker Style="{StaticResource DatePickerStyle}"
+                               Format="Custom"
+                               FormatString="MM/dd/yyyy HH:mm tt"
+                               Value="{Binding EntryDate}" />
+
+
+
+        </WrapPanel>
+
+        <!--  Author, Attendance  -->
+        <Label Style="{StaticResource HeaderLabel}">
+          <Label.Content>
+            <StackPanel Orientation="Horizontal">
+              <TextBlock>Entry Information</TextBlock>
+              <StackPanel Background="Transparent"
+                          MouseLeftButtonUp="HandleEditAttendance"
+                          TouchUp="HandleEditAttendance">
+                <TextBlock Margin="6,3"
+                           VerticalAlignment="Center"
+                           FontSize="17">
+                  <Hyperlink Click="HandleEditAttendance">Edit</Hyperlink>
+                </TextBlock>
+              </StackPanel>
+
+            </StackPanel>
+          </Label.Content>
+        </Label>
+
+        <StackPanel Style="{StaticResource Indented}"
+                    Orientation="Horizontal">
+          <Label HorizontalAlignment="Center"
+                 Content="Author: " />
+          <TextBlock VerticalAlignment="Center"
+                     Text="{Binding AttendanceViewModel.Author.DisplayName,
+                                    FallbackValue=???}" />
+        </StackPanel>
+        <StackPanel Style="{StaticResource Indented}"
+                    Orientation="Horizontal">
+          <Label HorizontalAlignment="Center"
+                 Content="Contributors: " />
+          <TextBlock VerticalAlignment="Center"
+                     Text="{Binding AttendanceViewModel.AvailableIndividuals,
+                                    Converter={c:AttendenceToStringConverter}}" />
+        </StackPanel>
+
+        <StackPanel Style="{StaticResource Indented}"
+                    Orientation="Horizontal">
+          <Label Content="Process Step: " />
+          <Label Content="{Binding ProcessSteps, Converter={c:ProcessSTepToStringConverter}}" />
+        </StackPanel>
+
+        <StackPanel Style="{StaticResource Indented}"
+                    Orientation="Horizontal">
+          <Label Content="Category: " />
+          <TextBlock VerticalAlignment="Center"
+                     Text="{Binding Category.DisplayName,
+                                    FallbackValue=???}" />
+        </StackPanel>
+
+
+        <!--  Accomplishments  -->
+        <Label Style="{StaticResource HeaderLabel}"
+               Content="Items Accomplished" />
+        <ContentControl Style="{StaticResource Indented}"
+                        Content="{Binding ItemsAccomplished}"
+                        ContentTemplate="{StaticResource ListEditorTemplate}" />
+
+        <!--  Next Steps  -->
+        <Label Style="{StaticResource HeaderLabel}"
+               Content="Next Steps" />
+        <ContentControl Margin="10,0,0,0"
+                        Content="{Binding NextSteps}"
+                        ContentTemplate="{StaticResource ListEditorTemplate}" />
+
+        <!--  Dynamic Body  -->
+        <GroupBox Header="Content">
+
+          <StackPanel>
+            <ItemsControl x:Name="Items"
+                          Grid.IsSharedSizeScope="True"
+                          ItemsSource="{Binding Sections.Items}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <DataTemplate.Resources />
+                  <Grid Background="Transparent">
+                    <Grid.RowDefinitions>
+                      <RowDefinition />
+                      <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                      <ColumnDefinition SharedSizeGroup="Type_Label" />
+                      <ColumnDefinition />
+                      <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.ContextMenu>
+                      <ContextMenu>
+                        <MenuItem Click="RemoveSection"
+                                  CommandParameter="{Binding}"
+                                  Header="Delete Section" />
+                      </ContextMenu>
+                    </Grid.ContextMenu>
+                    <StackPanel>
+                      <Label Padding="0,6,0,1"
+                             HorizontalContentAlignment="Right"
+                             Foreground="#CC000000"
+                             FontSize="12"
+                             Content="{Binding SectionType,
+                                               Converter={c:SubSectionTypeConverter}}" />
+                      <TextBlock HorizontalAlignment="Right">
+                        <Hyperlink FontSize="12"
+                                   Click="RemoveSection">
+                          delete 
+                        </Hyperlink>
+                      </TextBlock>
+                    </StackPanel>
+                    <ContentControl Grid.Column="1"
+                                    Margin="10,0,0,10"
+                                    Style="{StaticResource SubSectionContent}" />
+                    <StackPanel Grid.Column="2"
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Top"
+                                Orientation="Horizontal">
+                      <StackPanel.Resources>
+                        <Style TargetType="Button">
+                          <Setter Property="Width" Value="24" />
+                          <Setter Property="Height" Value="24" />
+                          <Setter Property="MinWidth" Value="0" />
+                          <Setter Property="Margin" Value="3,0" />
+                          <Setter Property="Padding" Value="0" />
+                          <Setter Property="Opacity" Value=".4" />
+                          <Setter Property="CommandParameter" Value="{Binding}" />
+                        </Style>
+                      </StackPanel.Resources>
+                      <Button Command="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl},
+                                                Path=DataContext.Sections.MoveSectionUpCommand}"
+                              Content="▲" />
+                      <Button Command="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl},
+                                                Path=DataContext.Sections.MoveSectionDownCommand}"
+                              Content="▼" />
+                    </StackPanel>
+
+                    <Separator Grid.Row="1"
+                               Grid.ColumnSpan="3" />
+                  </Grid>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <xctk:DropDownButton x:Name="AddDropDown"
+                                 Padding="3"
+                                 HorizontalAlignment="Right"
+                                 Content="Add Section">
+              <xctk:DropDownButton.DropDownContent>
+                <StackPanel>
+                  <Button Click="CloseDropDown"
+                          Command="{Binding Sections.AddSectionCommand}"
+                          CommandParameter="{x:Static mvvm:SubSectionType.Title}"
+                          Content="{Binding Source={x:Static mvvm:SubSectionType.Title},
+                                            Converter={c:SubSectionTypeConverter}}" />
+                  <Button Click="CloseDropDown"
+                          Command="{Binding Sections.AddSectionCommand}"
+                          CommandParameter="{x:Static mvvm:SubSectionType.Text}"
+                          Content="{Binding Source={x:Static mvvm:SubSectionType.Text},
+                                            Converter={c:SubSectionTypeConverter}}" />
+                  <Button Click="CloseDropDown"
+                          Command="{Binding Sections.AddSectionCommand}"
+                          CommandParameter="{x:Static mvvm:SubSectionType.ListItems}"
+                          Content="{Binding Source={x:Static mvvm:SubSectionType.ListItems},
+                                            Converter={c:SubSectionTypeConverter}}" />
+                  <Button Click="CloseDropDown"
+                          Command="{Binding Sections.AddSectionCommand}"
+                          CommandParameter="{x:Static mvvm:SubSectionType.ImageAndCaption}"
+                          Content="{Binding Source={x:Static mvvm:SubSectionType.ImageAndCaption},
+                                            Converter={c:SubSectionTypeConverter}}" />
+                  <Button Click="CloseDropDown"
+                          Command="{Binding Sections.AddSectionCommand}"
+                          CommandParameter="{x:Static mvvm:SubSectionType.ImageWithCaptionAndBlurb}"
+                          Content="{Binding Source={x:Static mvvm:SubSectionType.ImageWithCaptionAndBlurb},
+                                            Converter={c:SubSectionTypeConverter}}" />
+                  <Button Click="CloseDropDown"
+                          Command="{Binding Sections.AddSectionCommand}"
+                          CommandParameter="{x:Static mvvm:SubSectionType.ImageCollection}"
+                          Content="{Binding Source={x:Static mvvm:SubSectionType.ImageCollection},
+                                            Converter={c:SubSectionTypeConverter}}" />
+                </StackPanel>
+              </xctk:DropDownButton.DropDownContent>
+            </xctk:DropDownButton>
+          </StackPanel>
+
+
+        </GroupBox>
+
+        <!--  Reflections  -->
+        <Label Style="{StaticResource HeaderLabel}"
+               Content="Reflections" />
+        <TextBox Margin="10,0,0,0"
+                 Style="{StaticResource ExpandingTextBox}"
+                 Text="{Binding Reflections}" />
+      </StackPanel>
+
+
+
+    </ScrollViewer>
+
+  </Grid>
+</UserControl>

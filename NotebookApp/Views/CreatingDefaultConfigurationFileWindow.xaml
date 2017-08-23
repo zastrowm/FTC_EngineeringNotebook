@@ -1,0 +1,28 @@
+﻿<Window x:Class="NotebookApp.Views.CreatingDefaultConfigurationFileWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:NotebookApp.Views"
+        xmlns:notebookApp="clr-namespace:NotebookApp"
+        mc:Ignorable="d"
+        SizeToContent="Height"
+        Title="Default Configuration File Created"
+        Width="400">
+    <StackPanel Margin="10">
+        <TextBlock TextWrapping="Wrap">
+      No configuration file found at: <LineBreak />
+    <Run />
+    <Run />
+    <Run />
+    <Run />
+      <Run Text="{Binding Source={x:Static notebookApp:App.FileLocation}, Path=FullName, Mode=OneTime}" FontFamily="Consolas" />
+      <LineBreak />
+      <LineBreak />
+      A default file with dummy values will be created for you. 
+            Modify the file to suit your needs and restart the application to apply your changes.
+
+        </TextBlock>
+        <Button HorizontalAlignment="Right" Margin="10 10 0 0" Click="ButtonBase_OnClick">OK</Button>
+    </StackPanel>
+</Window>

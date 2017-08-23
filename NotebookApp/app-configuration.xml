@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Configuration>
+  <Steps>
+    <Step>Strategy &amp; Analysis</Step>
+    <Step>Design</Step>
+    <Step>Prototyping</Step>
+    <Step>Construction</Step>
+    <Step>Testing</Step>
+    <Step>Reflection</Step>
+  </Steps>
+  <Members>
+    <Member>Member1</Member>
+    <Member>Member2</Member>
+    <Member>Member3</Member>
+    <Member>Member4</Member>
+    <Member>Member5</Member>
+  </Members>
+  <Categories>
+    <Category>Drivetrain</Category>
+    <Category>Particle System</Category>
+    <Category>Beacon System</Category>
+    <Category>CapBall System</Category>
+    <Category>Electrical &amp; Sensors</Category>
+    <Category>Software</Category>
+  </Categories>
+  <Theme>
+    <!-- Change these colors to whatever you'd like -->
+    <CategoryColor>#E4E2F4</CategoryColor>
+    <CategoryColor>#FEDDDD</CategoryColor>
+    <CategoryColor>#F4E9E2</CategoryColor>
+    <CategoryColor>#DDF4FC</CategoryColor>
+    <CategoryColor>#F1E4EA</CategoryColor>
+    <CategoryColor>#DEF5E8</CategoryColor>
+  </Theme>
+</Configuration>

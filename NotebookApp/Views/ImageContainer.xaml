@@ -1,0 +1,54 @@
+﻿<UserControl x:Class="NotebookApp.Views.ImageContainer"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="clr-namespace:EngineeringNotebook.Converters"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:NotebookApp.Views"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             x:Name="Root"
+             d:DesignHeight="300"
+             d:DesignWidth="300"
+             mc:Ignorable="d">
+  <UserControl.ContextMenu>
+    <ContextMenu>
+      <MenuItem Header="Reset Image" Click="ResetImage" />
+    </ContextMenu>
+  </UserControl.ContextMenu>
+  <Border BorderBrush="#cc000000"
+          BorderThickness="1">
+    <Grid>
+      <Image MinWidth="200"
+             MinHeight="200"
+             MaxWidth="300"
+             MaxHeight="300"
+             Source="{Binding ElementName=Root,
+                              Path=Image,
+                              Converter={c:ImageBytesConverter}}" />
+      <StackPanel HorizontalAlignment="Center"
+                  VerticalAlignment="Center">
+        <Button Panel.ZIndex="10"
+                Click="HandleTakePictureClicked"
+                Content="Camera"
+                Visibility="{Binding ElementName=Root,
+                                     Path=Image.Data,
+                                     Converter={c:NullToVisibleConverter}}" />
+        <Button Panel.ZIndex="10"
+                Click="BrowseForPicture"
+                Content="From File"
+                Visibility="{Binding ElementName=Root,
+                                     Path=Image.Data,
+                                     Converter={c:NullToVisibleConverter}}" />
+      </StackPanel>
+
+      <Button Width="24"
+              Height="24"
+              MinWidth="0"
+              Padding="0"
+              HorizontalAlignment="Left"
+              VerticalAlignment="Bottom"
+              Opacity=".2"
+              Visibility="Collapsed"
+              Content="X" />
+    </Grid>
+  </Border>
+</UserControl>
