@@ -31,5 +31,8 @@
     <CategoryColor>#DDF4FC</CategoryColor>
     <CategoryColor>#F1E4EA</CategoryColor>
     <CategoryColor>#DEF5E8</CategoryColor>
+    <!-- Change these colors to whatever you'd like -->
+    <PrimaryColor>#FF99A1</PrimaryColor>
+    <SecondaryColor>#FFD6D9</SecondaryColor>
   </Theme>
 </Configuration>

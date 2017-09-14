@@ -55,5 +55,10 @@ namespace NotebookApp
     {
       return typeof(App).Assembly.GetManifestResourceStream("NotebookApp.app-configuration.xml");
     }
+
+    public static Stream GetDefaultImagePng()
+    {
+      return typeof(App).Assembly.GetManifestResourceStream("NotebookApp.image.png");
+    }
   }
 }

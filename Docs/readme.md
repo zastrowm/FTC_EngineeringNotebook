@@ -94,6 +94,9 @@ The file determines what steps, categories, and team members are used within the
     <CategoryColor>#FEDDDD</CategoryColor>
     ...
     <CategoryColor>#DEF5E8</CategoryColor>
+    <!-- Page Colors -->
+    <PrimaryColor>#FF99A1</PrimaryColor>
+    <SecondaryColor>#FFD6D9</SecondaryColor>
   </Theme>
 </Configuration>
 ```
@@ -136,3 +139,23 @@ and selectable via the `Entry Information` dialog:
 ## Configuration: `Theme`
 
 This section contains one or more `CategoryColor` elements, each of which defines a color (in hex format) to use for each of the categories along the right of the entry.
+
+### Page Colors
+
+This section also contains two properties for controlling the primary and secondary colors used when printing the page.  The primary color is specified with the `PrimaryColor` element, while the secondary color is specified in the `PrimaryColor`, both in hex format.
+
+The primary color is used for the:
+
+- Top of the page header, Top of of the page footer
+- Tasks Accomplished
+- Next Task boxes
+- Selected Categories and Selected Steps
+
+The secondary color is used for:
+
+- The bottom of the page header, the bottom of the page footer
+- Unselected steps
+
+# Header Image
+
+Place a 192x286 image, named `image.png` next to the executable and this image will be used in the header when printing the page.

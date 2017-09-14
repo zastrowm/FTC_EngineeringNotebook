@@ -133,6 +133,7 @@
     <Compile Include="AppConfigurationSettings.cs" />
     <Compile Include="CommandExtensions.cs" />
     <Compile Include="Converters\Base64DecoderConverter.cs" />
+    <Compile Include="Converters\ColorAndBrushConverter.cs" />
     <Compile Include="Converters\IsEqualToConverter.cs" />
     <Compile Include="Converters\SpaceToUnderlinableSpaceConverter.cs" />
     <Compile Include="Converters\SubSectionTypeConverter.cs" />
@@ -294,14 +295,14 @@
     <None Include="FodyWeavers.xml" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Printing\Thumb.png" />
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="app-configuration.xml" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Views\Images\print.png" />
     <Resource Include="Views\Images\save.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="image.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\Fody.2.0.0\build\dotnet\Fody.targets" Condition="Exists('..\packages\Fody.2.0.0\build\dotnet\Fody.targets')" />
